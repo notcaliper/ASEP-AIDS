@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { Icons } from './components/icons';
 import { MoistureMeter } from './components/MoistureMeter';
-import { PumpControl } from './components/PumpControl';
 import { ConnectionStatus } from './components/ConnectionStatus';
+import { ManualControl } from './components/ManualControl';
 import { ESP32WebSocket } from './lib/websocket';
 import { useESP32Store } from './lib/store';
 
@@ -10,18 +10,12 @@ import { useESP32Store } from './lib/store';
 const ws = new ESP32WebSocket();
 
 function App() {
-  const { moisture, pumpStatus, setPumpStatus } = useESP32Store();
+  const { moisture } = useESP32Store();
 
   useEffect(() => {
     ws.connect();
     return () => ws.disconnect();
   }, []);
-
-  const handlePumpToggle = () => {
-    const newStatus = !pumpStatus;
-    ws.sendCommand(newStatus ? 'pump_on' : 'pump_off');
-    setPumpStatus(newStatus);
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -46,42 +40,15 @@ function App() {
                 Current Moisture Level
               </h2>
               <MoistureMeter moisture={moisture} />
-              
               <div className="mt-4">
                 <p className="text-sm text-gray-600">
-                  Status: {' '}
-                  <span className={moisture < 30 
-                    ? 'text-red-500' 
-                    : moisture < 60 
-                      ? 'text-yellow-500' 
-                      : 'text-green-500'
-                  }>
-                    {moisture < 30 
-                      ? 'Dry - Watering Recommended' 
-                      : moisture < 60 
-                        ? 'Moderate' 
-                        : 'Optimal'
-                    }
-                  </span>
+                  Current moisture level: {moisture}%
                 </p>
               </div>
             </div>
 
-            {/* Controls */}
-            <div className="bg-gray-50 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-gray-700 mb-4">
-                Pump Controls
-              </h2>
-              <div className="flex items-center justify-between">
-                <PumpControl 
-                  isOn={pumpStatus} 
-                  onToggle={handlePumpToggle} 
-                />
-                <p className="text-sm text-gray-600">
-                  Last updated: {new Date().toLocaleTimeString()}
-                </p>
-              </div>
-            </div>
+            {/* Control Card */}
+            <ManualControl />
           </div>
         </div>
       </div>
